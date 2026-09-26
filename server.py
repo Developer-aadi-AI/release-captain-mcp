@@ -39,7 +39,26 @@ if not GITHUB_TOKEN:
     print("ERROR: GITHUB_TOKEN environment variable is not set.", file=sys.stderr)
     sys.exit(1)
 
-mcp = FastMCP("github-release-server")
+from mcp.server.transport_security import TransportSecuritySettings
+
+# The SDK's built-in DNS-rebinding protection only allows Host headers
+# matching localhost/127.0.0.1 by default (it's meant to protect naive,
+# unauthenticated local dev servers from malicious webpages). "*" is NOT
+# a real wildcard in this library's matcher (it only does exact matches or
+# a "host:*" pattern for wildcarding a PORT on one specific hostname) — so
+# there's no way to allow "any host" via allowed_hosts short of listing
+# every domain this might ever be deployed under.
+#
+# We disable this specific protection for the public deployment because
+# ApiKeyMiddleware below is the real access control here: DNS rebinding
+# matters for a server an attacker's browser could reach via localhost
+# with no auth in front of it, which no longer describes this server.
+mcp = FastMCP(
+    "github-release-server",
+    transport_security=TransportSecuritySettings(
+        enable_dns_rebinding_protection=False,
+    ),
+)
 
 
 class ApiKeyMiddleware(BaseHTTPMiddleware):
