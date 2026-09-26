@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "create-release-agent"
+version = "0.1.0"
+description = "Standalone release-captain style agent that drafts and publishes GitHub Releases."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = ["requests>=2.31.0"]
+license = {text = "MIT"}
+authors = [{name = "OpenAI"}]
+
+[project.scripts]
+create-release-agent = "create_release_agent.cli:main"
+
+[tool.setuptools]
+packages = ["create_release_agent"]
